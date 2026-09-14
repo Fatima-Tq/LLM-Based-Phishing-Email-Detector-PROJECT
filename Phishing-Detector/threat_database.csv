@@ -1,0 +1,15 @@
+url,threat_type,severity
+bit.ly,url_shortener,medium
+tinyurl.com,url_shortener,medium
+short.link,url_shortener,medium
+paypel.com,phishing_domain,high
+amaz0n.com,phishing_domain,high
+paypa1.com,phishing_domain,high
+goog1e.com,phishing_domain,high
+micros0ft.com,phishing_domain,high
+appl3.com,phishing_domain,high
+hides.my,proxy_service,high
+anonymouse.org,proxy_service,high
+ow.ly,url_shortener,medium
+goo.gl,url_shortener,medium
+bitly.com,url_shortener,medium

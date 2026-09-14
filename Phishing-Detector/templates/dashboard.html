@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Phishing Detector + Real Link Checker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #667eea;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .tab-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .form-group textarea,
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .result-box {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            border-left: 4px solid #667eea;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result-box.phishing {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            border-left-color: #dc3545;
+        }
+        
+        .result-box.legitimate {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-left-color: #28a745;
+        }
+        
+        .result-box.suspicious {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left-color: #ffc107;
+        }
+        
+        .result-status {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .risk-score {
+            font-size: 56px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            animation: pulse 0.5s ease;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .risk-score.high {
+            color: #dc3545;
+        }
+        
+        .risk-score.medium {
+            color: #ff6f00;
+        }
+        
+        .risk-score.low {
+            color: #28a745;
+        }
+        
+        .confidence-text {
+            text-align: center;
+            color: #666;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .explanation {
+            margin-top: 20px;
+            background: rgba(255,255,255,0.5);
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .explanation strong {
+            color: #333;
+            display: block;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        
+        .explanation ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .explanation li {
+            margin-bottom: 10px;
+            color: #555;
+            font-size: 14px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .explanation li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .threat-intel-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .threat-intel-section h3 {
+            color: #856404;
+            margin-bottom: 15px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .threat-item {
+            background: white;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .threat-item.legitimate {
+            border-left-color: #28a745;
+        }
+        
+        .threat-item-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .threat-item-details {
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .metric {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .metric:hover {
+            transform: translateY(-5px);
+        }
+        
+        .metric-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .confusion-matrix {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .cm-item {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .cm-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .cm-label {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .cm-positive {
+            background: #e8f5e9;
+            border-left: 4px solid #28a745;
+        }
+        
+        .cm-negative {
+            background: #ffebee;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .feature-breakdown {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        
+        .feature-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+        
+        .feature-row:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .feature-value {
+            color: #666;
+        }
+        
+        .feature-value.detected {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .info-box h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .info-box ul {
+            color: #555;
+            font-size: 13px;
+            line-height: 1.8;
+            padding-left: 20px;
+        }
+        
+        .link-status-icon {
+            font-size: 24px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 1024px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .confusion-matrix {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                justify-content: space-around;
+            }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #667eea;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>🔍 Advanced Phishing Detector + Real Link Checker</h1>
+            <p>University of Central Punjab | Cybersecurity Capstone Project</p>
+            <p>📚 Student: Fatima Tariq (L1F24BSSC0019)</p>
+        </div>
+        
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'email-analysis')">📧 Email Analysis</button>
+            <button class="tab-btn" onclick="switchTab(event, 'link-checker')">🔗 Link Checker</button>
+            <button class="tab-btn" onclick="switchTab(event, 'metrics')">📊 Model Metrics</button>
+            <button class="tab-btn" onclick="switchTab(event, 'info')">ℹ️ How It Works</button>
+        </div>
+        
+        <!-- TAB 1: EMAIL ANALYSIS -->
+        <div id="email-analysis" class="tab-content active">
+            <div class="card">
+                <h2>📧 Real Email Analysis</h2>
+                
+                <div class="form-group">
+                    <label>From (Sender Email Address)</label>
+                    <input type="email" id="sender_email" placeholder="e.g., support@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>Email Subject</label>
+                    <input type="text" id="email_subject" placeholder="E.g., Urgent: Verify Your Account">
+                </div>
+                
+                <div class="form-group">
+                    <label>Email Body (Full Content)</label>
+                    <textarea id="email_text" placeholder="Paste complete email content including all text and links..."></textarea>
+                </div>
+                
+                <button class="btn" onclick="analyzeEmail()">🔎 Analyze Email Now</button>
+                
+                <div id="email-result" class="result-box"></div>
+            </div>
+        </div>
+        
+        <!-- TAB 2: LINK CHECKER -->
+        <div id="link-checker" class="tab-content">
+            <div class="card">
+                <h2>🔗 Real-Time Link Threat Checker</h2>
+                
+                <p style="color: #666; margin-bottom: 15px; font-size: 14px;">
+                    Paste any URL/link below to check if it's safe or phishing. System will detect:
+                    ✓ Phishing domains ✓ Typosquatting ✓ Shortened URLs ✓ IP addresses ✓ Suspicious TLDs
+                </p>
+                
+                <div class="form-group">
+                    <label>Enter Link/URL</label>
+                    <input type="text" id="link_input" placeholder="https://example.com or bit.ly/abc or paypel.com">
+                </div>
+                
+                <button class="btn" onclick="checkLink()">🔍 Check Link Safety</button>
+                
+                <div id="link-result" class="result-box"></div>
+            </div>
+        </div>
+        
+        <!-- TAB 3: METRICS -->
+        <div id="metrics" class="tab-content">
+            <div class="card">
+                <h2>📊 ML Model Performance Metrics</h2>
+                
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="metric-value">{{ "%.1f" | format(test_results.accuracy) }}%</div>
+                        <div class="metric-label">Accuracy</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">{{ "%.1f" | format(test_results.precision) }}%</div>
+                        <div class="metric-label">Precision</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">{{ "%.1f" | format(test_results.recall) }}%</div>
+                        <div class="metric-label">Recall</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">{{ "%.1f" | format(test_results.f1) }}%</div>
+                        <div class="metric-label">F1-Score</div>
+                    </div>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 20px; margin-top: 20px; border-radius: 8px;">
+                    <h3 style="color: #333; margin-bottom: 15px;">Confusion Matrix</h3>
+                    <div class="confusion-matrix">
+                        <div class="cm-item cm-positive">
+                            <div class="cm-value">{{ test_results.true_positives }}</div>
+                            <div class="cm-label">True Positives<br>(Phishing Caught)</div>
+                        </div>
+                        <div class="cm-item cm-positive">
+                            <div class="cm-value">{{ test_results.true_negatives }}</div>
+                            <div class="cm-label">True Negatives<br>(Legit Passed)</div>
+                        </div>
+                        <div class="cm-item cm-negative">
+                            <div class="cm-value">{{ test_results.false_positives }}</div>
+                            <div class="cm-label">False Positives<br>(Legit Flagged)</div>
+                        </div>
+                        <div class="cm-item cm-negative">
+                            <div class="cm-value">{{ test_results.false_negatives }}</div>
+                            <div class="cm-label">False Negatives<br>(Phishing Missed)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #e8f5e9; padding: 15px; margin-top: 20px; border-radius: 8px;">
+                    <h3 style="color: #2e7d32; margin-bottom: 10px;">🤖 Model Details</h3>
+                    <div style="color: #555; font-size: 13px; line-height: 1.8;">
+                        <strong>Algorithm:</strong> Random Forest Classifier<br>
+                        <strong>Trees:</strong> 100<br>
+                        <strong>Max Depth:</strong> 10<br>
+                        <strong>Features:</strong> 5 (Sender, Urgency, Links, Link Suspicion, Body Length)<br>
+                        <strong>Training Data:</strong> 20 emails (70% train, 30% test)<br>
+                        <strong>Random State:</strong> 42 (reproducible)
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TAB 4: INFO -->
+        <div id="info" class="tab-content">
+            <div class="card">
+                <h2>ℹ️ How the System Works</h2>
+                
+                <div class="info-box">
+                    <h3>🔍 Email Analysis Features</h3>
+                    <ul>
+                        <li><strong>Sender Validation:</strong> Checks if sender domain is spoofed (e.g., paypel.com vs paypal.com)</li>
+                        <li><strong>Urgency Detection:</strong> Identifies urgent/threatening keywords ("Verify NOW", "Account Suspended", etc.)</li>
+                        <li><strong>Link Analysis:</strong> Extracts and analyzes all URLs in email</li>
+                        <li><strong>Link Suspicion:</strong> Flags shortened URLs, typosquatted domains, IP addresses</li>
+                        <li><strong>Body Length:</strong> Unusually short emails are more likely phishing</li>
+                    </ul>
+                </div>
+                
+                <div class="info-box">
+                    <h3>🔗 Link Checking Threats Detected</h3>
+                    <ul>
+                        <li><strong>Phishing Domains:</strong> paypel.com, amaz0n.com, paypa1.com, goog1e.com, etc.</li>
+                        <li><strong>Typosquatting:</strong> Misspelled famous domains (mimics real company names)</li>
+                        <li><strong>IP Addresses:</strong> Direct IP instead of domain name (suspicious)</li>
+                        <li><strong>Shortened URLs:</strong> bit.ly, tinyurl, ow.ly (hides actual destination)</li>
+                        <li><strong>Suspicious TLDs:</strong> .tk, .ml, .ga (free domains used by attackers)</li>
+                        <li><strong>Unicode Domains:</strong> Homograph attacks using similar-looking characters</li>
+                    </ul>
+                </div>
+                
+                <div class="info-box">
+                    <h3>📊 Risk Score Levels</h3>
+                    <ul>
+                        <li><strong>0-30%:</strong> 🟢 Low Risk - Email appears legitimate</li>
+                        <li><strong>31-70%:</strong> 🟡 Medium Risk - Suspicious characteristics detected</li>
+                        <li><strong>71-100%:</strong> 🔴 High Risk - Likely phishing, do NOT click links</li>
+                    </ul>
+                </div>
+                
+                <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <strong style="color: #856404;">⚠️ Important Security Tips</strong>
+                    <ul style="color: #666; font-size: 13px; line-height: 1.8; margin-top: 10px; padding-left: 20px;">
+                        <li>Never click links in suspicious emails - verify directly with company</li>
+                        <li>Check sender email carefully (paypel.com ≠ paypal.com)</li>
+                        <li>Hover over links to see actual destination</li>
+                        <li>Be wary of urgent language and account threats</li>
+                        <li>Major companies never ask for passwords via email</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function switchTab(event, tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active from all buttons
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function analyzeEmail() {
+            const emailText = document.getElementById('email_text').value;
+            const senderEmail = document.getElementById('sender_email').value;
+            
+            if (!emailText.trim()) {
+                alert('❌ Please paste email content!');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('email-result');
+            resultDiv.innerHTML = '<div class="loading"></div>';
+            resultDiv.style.display = 'block';
+            
+            const data = {
+                email_text: emailText,
+                sender_email: senderEmail
+            };
+            
+            fetch('/analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.error) {
+                    resultDiv.innerHTML = `<div style="color: #dc3545;"><strong>❌ Error:</strong> ${result.error}</div>`;
+                } else {
+                    displayEmailResult(result, resultDiv);
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `<div style="color: #dc3545;"><strong>❌ Error:</strong> ${error}</div>`;
+            });
+        }
+        
+        function displayEmailResult(result, resultDiv) {
+            const riskClass = result.risk_score > 70 ? 'high' : result.risk_score > 40 ? 'medium' : 'low';
+            const statusClass = result.is_phishing ? 'phishing' : 'legitimate';
+            const status = result.is_phishing ? '🚨 PHISHING DETECTED' : '✅ LEGITIMATE EMAIL';
+            
+            let featureHtml = '';
+            if (result.features) {
+                featureHtml = `
+                    <div class="feature-breakdown">
+                        <strong style="display: block; margin-bottom: 10px;">Detected Features:</strong>
+                        <div class="feature-row">
+                            <span class="feature-label">Urgency Language:</span>
+                            <span class="feature-value ${result.features.urgency ? 'detected' : ''}">
+                                ${result.features.urgency ? '✓ Detected' : '✗ None'}
+                            </span>
+                        </div>
+                        <div class="feature-row">
+                            <span class="feature-label">Contains Links:</span>
+                            <span class="feature-value ${result.features.links ? 'detected' : ''}">
+                                ${result.features.links ? '✓ Yes' : '✗ No'}
+                            </span>
+                        </div>
+                        <div class="feature-row">
+                            <span class="feature-label">Suspicious Links:</span>
+                            <span class="feature-value ${result.features.suspicious_links ? 'detected' : ''}">
+                                ${result.features.suspicious_links ? '⚠️ Yes' : '✓ No'}
+                            </span>
+                        </div>
+                        <div class="feature-row">
+                            <span class="feature-label">Spoofed Sender:</span>
+                            <span class="feature-value ${result.features.spoofed_sender ? 'detected' : ''}">
+                                ${result.features.spoofed_sender ? '⚠️ Yes' : '✓ No'}
+                            </span>
+                        </div>
+                        <div class="feature-row">
+                            <span class="feature-label">Email Length:</span>
+                            <span class="feature-value">${result.features.body_length} characters</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            resultDiv.className = `result-box ${statusClass}`;
+            resultDiv.innerHTML = `
+                <div class="result-status">${status}</div>
+                <div class="risk-score ${riskClass}">${result.risk_score}%</div>
+                <div class="confidence-text">Model Confidence: <strong>${result.confidence}%</strong></div>
+                
+                <div class="explanation">
+                    <strong>📋 Analysis Report:</strong>
+                    <ul>
+                        ${result.explanation.map(e => `<li>${e}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                ${featureHtml}
+            `;
+        }
+        
+        function checkLink() {
+            const url = document.getElementById('link_input').value;
+            
+            if (!url.trim()) {
+                alert('❌ Please enter a link!');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('link-result');
+            resultDiv.innerHTML = '<div class="loading"></div>';
+            resultDiv.style.display = 'block';
+            
+            fetch('/check-link', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({url: url})
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.error) {
+                    resultDiv.innerHTML = `<div style="color: #dc3545;"><strong>❌ Error:</strong> ${result.error}</div>`;
+                } else {
+                    displayLinkResult(result, resultDiv);
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `<div style="color: #dc3545;"><strong>❌ Error:</strong> ${error}</div>`;
+            });
+        }
+        
+        function displayLinkResult(result, resultDiv) {
+            let statusClass = 'legitimate';
+            let statusIcon = '✅';
+            let statusText = 'SAFE';
+            
+            if (result.risk_score >= 80) {
+                statusClass = 'phishing';
+                statusIcon = '🚨';
+                statusText = 'PHISHING';
+            } else if (result.risk_score >= 50) {
+                statusClass = 'suspicious';
+                statusIcon = '⚠️';
+                statusText = 'SUSPICIOUS';
+            }
+            
+            resultDiv.className = `result-box ${statusClass}`;
+            resultDiv.innerHTML = `
+                <div class="link-status-icon">${statusIcon}</div>
+                <div class="result-status" style="text-align: center;">${statusText}</div>
+                <div class="risk-score ${result.risk_score > 70 ? 'high' : result.risk_score > 40 ? 'medium' : 'low'}" style="text-align: center;">
+                    ${result.risk_score}/100
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.6); padding: 15px; border-radius: 5px; margin-top: 15px;">
+                    <div style="margin-bottom: 15px;">
+                        <strong style="display: block; margin-bottom: 5px;">🔗 URL Analyzed:</strong>
+                        <code style="word-break: break-all; color: #667eea; font-size: 12px;">${result.url}</code>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong style="display: block; margin-bottom: 5px;">Domain:</strong>
+                        <span style="color: #555;">${result.domain}</span>
+                    </div>
+                    <div>
+                        <strong style="display: block; margin-bottom: 5px;">🚨 Threat Detected:</strong>
+                        <span style="color: #555; font-weight: 600;">${result.threat}</span>
+                    </div>
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.1);">
+                        <strong style="display: block; margin-bottom: 5px;">Severity Level:</strong>
+                        <span style="padding: 4px 8px; border-radius: 3px; display: inline-block; font-size: 12px; font-weight: 600;" 
+                              style="background: ${result.severity === 'CRITICAL' ? '#ffebee' : result.severity === 'HIGH' ? '#ffebee' : result.severity === 'MEDIUM' ? '#fff3e0' : '#e8f5e9'};
+                                      color: ${result.severity === 'CRITICAL' ? '#dc3545' : result.severity === 'HIGH' ? '#dc3545' : result.severity === 'MEDIUM' ? '#ff6f00' : '#28a745'};">
+                            ${result.severity}
+                        </span>
+                    </div>
+                </div>
+                
+                <div style="background: #ffebee; border-left: 4px solid #dc3545; padding: 15px; border-radius: 5px; margin-top: 15px;">
+                    <strong style="color: #c62828;">⚠️ Security Warning</strong>
+                    <p style="color: #666; font-size: 13px; margin-top: 8px;">
+                        ${result.risk_score >= 80 ? 
+                        '🚫 Do NOT click this link! It appears to be a phishing attempt. Report it to the appropriate service.' :
+                        result.risk_score >= 50 ?
+                        '⚠️ This link is suspicious. Hover to verify the destination before clicking.' :
+                        '✅ This link appears safe, but always verify links from unknown senders.'}
+                    </p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+email_id,sender,subject,body_length,has_urgency,has_links,link_suspicious,sender_spoofed,label
+1,support@paypal.com,Urgent: Verify Your Account,250,1,1,0,0,phishing
+2,noreply@amazon.com,ACTION REQUIRED: Update Payment Method,300,1,1,1,0,phishing
+3,security@bank.com,CONFIRM YOUR IDENTITY NOW,200,1,0,0,0,phishing
+4,alert@apple.com,Your Apple ID will be disabled,280,1,1,1,0,phishing
+5,info@microsoft.com,Verify your Microsoft account immediately,320,1,1,1,0,phishing
+6,support@netflix.com,Your subscription has expired,150,1,0,0,0,phishing
+7,delivery@fedex.com,Package delivery failed,180,0,1,1,0,phishing
+8,noreply@ebay.com,Confirm your eBay account,220,1,1,0,0,phishing
+9,accounts@google.com,Suspicious activity on your account,290,1,1,1,0,phishing
+10,billing@stripe.com,Payment method declined,160,0,0,0,0,phishing
+11,john@company.com,Meeting at 3pm tomorrow,80,0,0,0,0,legitimate
+12,hr@company.com,Monthly newsletter - August 2024,200,0,0,0,0,legitimate
+13,noreply@github.com,Notification: Code review ready,150,0,1,0,0,legitimate
+14,support@digitalocean.com,Your billing summary,120,0,0,0,0,legitimate
+15,hello@slack.com,Digest - Your messages from today,140,0,0,0,0,legitimate
+16,info@coursera.org,New course available in your interests,180,0,0,0,0,legitimate
+17,noreply@stackoverflow.com,Your weekly digest,160,0,1,0,0,legitimate
+18,team@asana.com,Project update,130,0,1,0,0,legitimate
+19,news@techcrunch.com,Latest startup news,250,0,1,0,0,legitimate
+20,updates@wordpress.com,Security update available,170,0,0,0,0,legitimate

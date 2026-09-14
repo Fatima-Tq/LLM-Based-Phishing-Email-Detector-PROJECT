@@ -1,0 +1,8 @@
+flask
+pandas
+scikit-learn
+joblib
+email-validator
+beautifulsoup4
+matplotlib
+numpy
